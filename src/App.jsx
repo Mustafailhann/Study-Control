@@ -5,11 +5,13 @@ import { auth } from "./firebase";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Sidebar from "./Sidebar";
+import AIChat from "./AIChat";
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // "all", "completed", "shouldStudy"
+  const [showAIChat, setShowAIChat] = useState(false);
 
   useEffect(() => {
     return onAuthStateChanged(auth, u => {
@@ -35,7 +37,7 @@ function App() {
       <div style={{ display: "flex", minHeight: "100vh" }}>
         {/* SIDEBAR */}
         <div style={{ width: 280, flexShrink: 0 }}>
-          <Sidebar filter={filter} setFilter={setFilter} />
+          <Sidebar filter={filter} setFilter={setFilter} onAIClick={() => setShowAIChat(true)} />
         </div>
 
         {/* CONTENT */}
@@ -44,6 +46,9 @@ function App() {
             <Route path="/" element={<Dashboard filter={filter} />} />
           </Routes>
         </div>
+
+        {/* AI CHAT MODAL */}
+        {showAIChat && <AIChat onClose={() => setShowAIChat(false)} />}
       </div>
     </BrowserRouter>
   );

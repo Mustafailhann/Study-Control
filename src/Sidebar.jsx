@@ -9,7 +9,7 @@ const colors = {
   dark: "#1f2937"
 };
 
-export default function Sidebar({ filter, setFilter }) {
+export default function Sidebar({ filter, setFilter, onAIClick }) {
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -125,6 +125,39 @@ export default function Sidebar({ filter, setFilter }) {
           </div>
         ))}
       </div>
+
+      {/* AI Chat Button */}
+      <button
+        onClick={onAIClick}
+        style={{
+          padding: "14px 16px",
+          background: "rgba(16, 185, 129, 0.9)",
+          color: colors.white,
+          border: "none",
+          borderRadius: 12,
+          cursor: "pointer",
+          fontWeight: 600,
+          fontSize: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          transition: "all 0.2s ease",
+          boxShadow: "0 4px 15px rgba(16, 185, 129, 0.3)",
+          marginBottom: 8
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = "rgba(16, 185, 129, 1)";
+          e.currentTarget.style.transform = "translateY(-2px)";
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = "rgba(16, 185, 129, 0.9)";
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+      >
+        <span>🤖</span>
+        AI Koç
+      </button>
 
       {/* Divider */}
       <div style={{ 
