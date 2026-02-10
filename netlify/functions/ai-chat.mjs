@@ -174,7 +174,7 @@ Kural: Samimi ve destekleyici bir dil kullan, kullanıcının adı ${username}.
       `${message}\n\n<KULLANICI_OZETI_JSON>\n` + JSON.stringify(summary) + '\n</KULLANICI_OZETI_JSON>';
 
     const { text } = await callGemini({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       system,
       messages: [...history, { role: "user", content: userContent }],
     });

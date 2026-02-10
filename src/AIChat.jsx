@@ -151,7 +151,7 @@ export default function AIChat({ onClose }) {
                 AI Sınav Koçu
               </h2>
               <p style={{ margin: "4px 0 0", fontSize: 12, opacity: 0.9 }}>
-                Gemini 1.5 Flash ile desteklenmektedir
+                Gemini 2.5 Flash ile desteklenmektedir
               </p>
             </div>
           </div>
@@ -471,8 +471,8 @@ function ReportView({ report }) {
           {r.confidence.level === "high"
             ? "🟢 Yüksek"
             : r.confidence.level === "medium"
-            ? "🟡 Orta"
-            : "🔴 Düşük"}
+              ? "🟡 Orta"
+              : "🔴 Düşük"}
           <br />
           {r.confidence.notes}
         </div>

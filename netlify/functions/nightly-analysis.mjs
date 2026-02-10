@@ -233,7 +233,7 @@ Lütfen bu JSON şemasına göre günlük analiz raporu oluştur:
 `.trim();
 
       const { text } = await callGemini({
-        model: "gemini-1.5-pro",
+        model: "gemini-2.5-flash",
         system,
         messages: [{ role: "user", content: userPrompt }],
         responseMimeType: "application/json",
@@ -252,7 +252,7 @@ Lütfen bu JSON şemasına göre günlük analiz raporu oluştur:
         userType,
         dateKey,
         createdAt: new Date(),
-        model: "gemini-1.5-pro",
+        model: "gemini-2.5-flash",
         summary,
         report,
       });
