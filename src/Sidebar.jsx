@@ -9,7 +9,7 @@ const colors = {
   dark: "#1f2937"
 };
 
-export default function Sidebar({ filter, setFilter, onAIClick }) {
+export default function Sidebar({ filter, setFilter, onAIClick, onReportClick }) {
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -33,16 +33,16 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
       }}
     >
       {/* Logo */}
-      <div style={{ 
+      <div style={{
         marginBottom: 32,
         padding: "16px",
         background: "rgba(255,255,255,0.1)",
         borderRadius: 16,
         backdropFilter: "blur(10px)"
       }}>
-        <h2 style={{ 
-          margin: 0, 
-          color: colors.white, 
+        <h2 style={{
+          margin: 0,
+          color: colors.white,
           fontSize: 22,
           fontWeight: 700,
           display: "flex",
@@ -52,10 +52,10 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
           <span style={{ fontSize: 28 }}>📖</span>
           Study Control
         </h2>
-        <p style={{ 
-          margin: "8px 0 0", 
-          color: "rgba(255,255,255,0.7)", 
-          fontSize: 12 
+        <p style={{
+          margin: "8px 0 0",
+          color: "rgba(255,255,255,0.7)",
+          fontSize: 12
         }}>
           Hedefine odaklan, başarıya ulaş
         </p>
@@ -63,9 +63,9 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
 
       {/* Menu */}
       <div style={{ flex: 1 }}>
-        <div style={{ 
-          color: "rgba(255,255,255,0.5)", 
-          fontSize: 11, 
+        <div style={{
+          color: "rgba(255,255,255,0.5)",
+          fontSize: 11,
           fontWeight: 600,
           textTransform: "uppercase",
           letterSpacing: 1,
@@ -74,15 +74,15 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
         }}>
           Menü
         </div>
-        
+
         {menuItems.map(item => (
           <div
             key={item.id}
             onClick={() => setFilter(item.id)}
             style={{
               padding: "14px 16px",
-              background: filter === item.id 
-                ? "rgba(255,255,255,0.95)" 
+              background: filter === item.id
+                ? "rgba(255,255,255,0.95)"
                 : "rgba(255,255,255,0.1)",
               borderRadius: 12,
               marginBottom: 8,
@@ -93,8 +93,8 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
               color: filter === item.id ? colors.dark : colors.white,
               fontWeight: filter === item.id ? 600 : 400,
               transition: "all 0.2s ease",
-              boxShadow: filter === item.id 
-                ? "0 4px 15px rgba(0,0,0,0.1)" 
+              boxShadow: filter === item.id
+                ? "0 4px 15px rgba(0,0,0,0.1)"
                 : "none"
             }}
             onMouseEnter={e => {
@@ -126,44 +126,76 @@ export default function Sidebar({ filter, setFilter, onAIClick }) {
         ))}
       </div>
 
-      {/* AI Chat Button */}
-      <button
-        onClick={onAIClick}
-        style={{
-          padding: "14px 16px",
-          background: "rgba(16, 185, 129, 0.9)",
-          color: colors.white,
-          border: "none",
-          borderRadius: 12,
-          cursor: "pointer",
-          fontWeight: 600,
-          fontSize: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          transition: "all 0.2s ease",
-          boxShadow: "0 4px 15px rgba(16, 185, 129, 0.3)",
-          marginBottom: 8
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = "rgba(16, 185, 129, 1)";
-          e.currentTarget.style.transform = "translateY(-2px)";
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = "rgba(16, 185, 129, 0.9)";
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
-      >
-        <span>🤖</span>
-        AI Koç
-      </button>
+      {/* AI Buttons Container */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
+        <button
+          onClick={onReportClick}
+          style={{
+            padding: "14px 16px",
+            background: "rgba(99, 102, 241, 0.9)", // indigo primary
+            color: colors.white,
+            border: "none",
+            borderRadius: 12,
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: 14,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            transition: "all 0.2s ease",
+            boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)"
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = "rgba(99, 102, 241, 1)";
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = "rgba(99, 102, 241, 0.9)";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          <span>📊</span>
+          Günlük Analiz
+        </button>
+
+        <button
+          onClick={onAIClick}
+          style={{
+            padding: "14px 16px",
+            background: "rgba(16, 185, 129, 0.9)",
+            color: colors.white,
+            border: "none",
+            borderRadius: 12,
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: 14,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            transition: "all 0.2s ease",
+            boxShadow: "0 4px 15px rgba(16, 185, 129, 0.3)"
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = "rgba(16, 185, 129, 1)";
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = "rgba(16, 185, 129, 0.9)";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          <span>🤖</span>
+          AI Koç
+        </button>
+      </div>
 
       {/* Divider */}
-      <div style={{ 
-        height: 1, 
-        background: "rgba(255,255,255,0.2)", 
-        margin: "16px 0" 
+      <div style={{
+        height: 1,
+        background: "rgba(255,255,255,0.2)",
+        margin: "16px 0"
       }} />
 
       {/* Logout */}

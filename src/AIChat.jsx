@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { auth } from "./firebase";
+import ReactMarkdown from "react-markdown";
 
 const colors = {
   primary: "#6366f1",
@@ -11,7 +12,7 @@ const colors = {
   grayLight: "#f3f4f6",
 };
 
-export default function AIChat({ onClose }) {
+export default function AIChat({ onClose, defaultShowReport }) {
   const [messages, setMessages] = useState([
     {
       role: "model",
@@ -21,7 +22,7 @@ export default function AIChat({ onClose }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [latestReport, setLatestReport] = useState(null);
-  const [showReport, setShowReport] = useState(false);
+  const [showReport, setShowReport] = useState(defaultShowReport || false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -156,23 +157,6 @@ export default function AIChat({ onClose }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            {latestReport && (
-              <button
-                onClick={() => setShowReport(!showReport)}
-                style={{
-                  background: "rgba(255,255,255,0.2)",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "8px 16px",
-                  color: colors.white,
-                  cursor: "pointer",
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                📊 {showReport ? "Sohbet" : "Günlük Analiz"}
-              </button>
-            )}
             <button
               onClick={onClose}
               style={{
@@ -218,18 +202,35 @@ export default function AIChat({ onClose }) {
                 >
                   <div
                     style={{
-                      maxWidth: "75%",
+                      maxWidth: "85%",
                       padding: "12px 16px",
                       borderRadius: 16,
                       background:
                         msg.role === "user" ? colors.primary : colors.white,
                       color: msg.role === "user" ? colors.white : colors.dark,
                       boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                      whiteSpace: "pre-wrap",
                       wordBreak: "break-word",
+                      fontSize: 14,
+                      lineHeight: 1.5,
                     }}
                   >
-                    {msg.content}
+                    {msg.role === "user" ? (
+                      <div style={{ whiteSpace: "pre-wrap", margin: 0 }}>{msg.content}</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <ReactMarkdown
+                          components={{
+                            p: ({ node, ...props }) => <p style={{ margin: 0 }} {...props} />,
+                            ul: ({ node, ...props }) => <ul style={{ paddingLeft: 20, margin: 0 }} {...props} />,
+                            ol: ({ node, ...props }) => <ol style={{ paddingLeft: 20, margin: 0 }} {...props} />,
+                            li: ({ node, ...props }) => <li style={{ marginBottom: 4 }} {...props} />,
+                            strong: ({ node, ...props }) => <strong style={{ fontWeight: 600, color: colors.primary }} {...props} />,
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

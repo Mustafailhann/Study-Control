@@ -7,11 +7,12 @@ import Dashboard from "./Dashboard";
 import Sidebar from "./Sidebar";
 import AIChat from "./AIChat";
 
-function App() {
+export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // "all", "completed", "shouldStudy"
   const [showAIChat, setShowAIChat] = useState(false);
+  const [openReportDefault, setOpenReportDefault] = useState(false);
 
   useEffect(() => {
     return onAuthStateChanged(auth, u => {
@@ -37,7 +38,18 @@ function App() {
       <div style={{ display: "flex", minHeight: "100vh" }}>
         {/* SIDEBAR */}
         <div style={{ width: 280, flexShrink: 0 }}>
-          <Sidebar filter={filter} setFilter={setFilter} onAIClick={() => setShowAIChat(true)} />
+          <Sidebar
+            filter={filter}
+            setFilter={setFilter}
+            onAIClick={() => {
+              setOpenReportDefault(false);
+              setShowAIChat(true);
+            }}
+            onReportClick={() => {
+              setOpenReportDefault(true);
+              setShowAIChat(true);
+            }}
+          />
         </div>
 
         {/* CONTENT */}
@@ -48,10 +60,13 @@ function App() {
         </div>
 
         {/* AI CHAT MODAL */}
-        {showAIChat && <AIChat onClose={() => setShowAIChat(false)} />}
+        {showAIChat && (
+          <AIChat
+            defaultShowReport={openReportDefault}
+            onClose={() => setShowAIChat(false)}
+          />
+        )}
       </div>
     </BrowserRouter>
   );
 }
-
-export default App;
