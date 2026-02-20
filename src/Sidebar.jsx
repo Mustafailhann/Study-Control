@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -19,6 +20,31 @@ export default function Sidebar({ filter, setFilter, onAIClick, onReportClick })
     { id: "completed", label: "Tamamlananlar", icon: "✅", count: null },
     { id: "shouldStudy", label: "Tekrar Edilecek", icon: "🔄", count: null }
   ];
+
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    // YKS 2026 (Tahmini: 20 Haziran 2026 10:15)
+    const yksDate = new Date("2026-06-20T10:15:00").getTime();
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = yksDate - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0 });
+      } else {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div
@@ -124,6 +150,35 @@ export default function Sidebar({ filter, setFilter, onAIClick, onReportClick })
             )}
           </div>
         ))}
+      </div>
+
+      {/* YKS Countdown */}
+      <div style={{
+        marginTop: "auto",
+        marginBottom: 16,
+        padding: "16px",
+        background: "rgba(0,0,0,0.2)",
+        borderRadius: 12,
+        color: colors.white,
+        textAlign: "center"
+      }}>
+        <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 8, fontWeight: 600, letterSpacing: 0.5 }}>YKS'YE KALAN SÜRE</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{timeLeft.days}</div>
+            <div style={{ fontSize: 10, opacity: 0.7 }}>GÜN</div>
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, opacity: 0.5, paddingBottom: 12 }}>:</div>
+          <div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{timeLeft.hours}</div>
+            <div style={{ fontSize: 10, opacity: 0.7 }}>SAAT</div>
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, opacity: 0.5, paddingBottom: 12 }}>:</div>
+          <div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{timeLeft.minutes}</div>
+            <div style={{ fontSize: 10, opacity: 0.7 }}>DK</div>
+          </div>
+        </div>
       </div>
 
       {/* AI Buttons Container */}
