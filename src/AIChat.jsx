@@ -23,6 +23,7 @@ export default function AIChat({ onClose, defaultShowReport }) {
   const [loading, setLoading] = useState(false);
   const [latestReport, setLatestReport] = useState(null);
   const [showReport, setShowReport] = useState(defaultShowReport || false);
+  const [reportLoading, setReportLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function AIChat({ onClose, defaultShowReport }) {
 
   const fetchLatestReport = async () => {
     try {
+      setReportLoading(true);
       const token = await auth.currentUser.getIdToken();
       const res = await fetch("/.netlify/functions/get-latest-report", {
         headers: { Authorization: `Bearer ${token}` },
@@ -45,6 +47,30 @@ export default function AIChat({ onClose, defaultShowReport }) {
       }
     } catch (e) {
       console.error("Report fetch error:", e);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const generateReport = async () => {
+    try {
+      setReportLoading(true);
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch("/.netlify/functions/generate-report", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.ok && data.report) {
+        setLatestReport(data.report);
+      } else {
+        alert("Rapor oluşturulurken bir hata oluştu: " + (data.error || "Bilinmeyen hata"));
+      }
+    } catch (e) {
+      console.error("Report generate error:", e);
+      alert("Bağlantı hatası.");
+    } finally {
+      setReportLoading(false);
     }
   };
 
@@ -175,9 +201,67 @@ export default function AIChat({ onClose, defaultShowReport }) {
         </div>
 
         {/* Content */}
-        {showReport && latestReport ? (
-          <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
-            <ReportView report={latestReport} />
+        {showReport ? (
+          <div style={{ flex: 1, overflow: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
+            {reportLoading ? (
+              <div style={{ margin: "auto", textAlign: "center", color: colors.gray }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+                <p style={{ margin: 0, fontWeight: 500 }}>Analiz yükleniyor...</p>
+                <p style={{ margin: "8px 0 0", fontSize: 13, opacity: 0.8 }}>Bu işlem yaklaşık 15-20 saniye sürebilir.</p>
+              </div>
+            ) : latestReport ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+                  <button
+                    onClick={generateReport}
+                    style={{
+                      padding: "8px 16px",
+                      background: colors.primary,
+                      color: colors.white,
+                      border: "none",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    <span>🔄</span> Analizi Yenile
+                  </button>
+                </div>
+                <ReportView report={latestReport} />
+              </>
+            ) : (
+              <div style={{ margin: "auto", textAlign: "center" }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+                <h3 style={{ color: colors.dark, marginBottom: 8 }}>Henüz analiz oluşturulmamış</h3>
+                <p style={{ color: colors.gray, marginBottom: 24, fontSize: 14, maxWidth: 300, margin: "0 auto 24px" }}>
+                  Çalışma verilerine dayanarak bugünün analizini ve yarının planını oluşturabilirsin.
+                </p>
+                <button
+                  onClick={generateReport}
+                  style={{
+                    padding: "12px 24px",
+                    background: colors.primary,
+                    color: colors.white,
+                    border: "none",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    margin: "0 auto"
+                  }}
+                >
+                  <span>⚡</span> Bugünün Analizini Oluştur
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>
