@@ -26,6 +26,7 @@ const colors = {
 export default function Dashboard({ filter = "all" }) {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const [expanded, setExpanded] = useState({});
   const [userType, setUserType] = useState(null);
   const [userName, setUserName] = useState("");
@@ -46,6 +47,7 @@ export default function Dashboard({ filter = "all" }) {
 
   // Partner bul (farklı yazım biçimleri için)
   const findPartner = (username) => {
+    if (!username) return null;
     const normalized = username.toLowerCase()
       .replace(/ü/g, 'u')
       .replace(/ö/g, 'o')
@@ -65,40 +67,47 @@ export default function Dashboard({ filter = "all" }) {
 
   useEffect(() => {
     async function fetchData() {
-      const user = auth.currentUser;
-      if (!user) return;
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        setUserType(userData.userType);
-        setUserName(userData.username);
-        setUserGamification({
-          xp: userData.xp || 0,
-          level: calculateLevel(userData.xp || 0),
-          badges: userData.badges || []
-        });
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserType(userData.userType);
+          setUserName(userData.username);
+          setUserGamification({
+            xp: userData.xp || 0,
+            level: calculateLevel(userData.xp || 0),
+            badges: userData.badges || []
+          });
 
-        const examType = userData.userType === "mufettislik" ? "ziraat" : "yks";
+          const examType = userData.userType === "mufettislik" ? "ziraat" : "yks";
 
-        const q = query(
-          collection(db, "subjects"),
-          where("exam", "==", examType)
-        );
+          const q = query(
+            collection(db, "subjects"),
+            where("exam", "==", examType)
+          );
 
-        const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({
-          id: d.id,
-          ...d.data(),
-          topicDetails: d.data().topicDetails || {}
-        }));
-        setSubjects(list);
+          const snap = await getDocs(q);
+          const list = snap.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            topicDetails: d.data().topicDetails || {}
+          }));
+          setSubjects(list);
 
-        // Partner verilerini çek
-        await fetchPartnerStats(userData.username);
+          // Partner verilerini çek
+          if (userData.username) {
+            await fetchPartnerStats(userData.username);
+          }
+        }
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        setErrorMsg(err.message || "Veriler yüklenirken bir hata oluştu.");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     fetchData();
@@ -349,22 +358,25 @@ export default function Dashboard({ filter = "all" }) {
 
   if (loading) {
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: colors.grayLight
-      }}>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
         <div style={{
-          width: 50,
-          height: 50,
+          width: 40, height: 40, borderRadius: "50%",
           border: `4px solid ${colors.grayLight}`,
-          borderTop: `4px solid ${colors.primary}`,
-          borderRadius: "50%",
+          borderTopColor: colors.primary,
           animation: "spin 1s linear infinite"
         }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <div style={{ background: colors.dangerLight, color: colors.danger, padding: "24px 32px", borderRadius: 16, textAlign: "center", maxWidth: 500 }}>
+          <h2 style={{ margin: "0 0 12px 0" }}>⚠️ Bir Hata Oluştu</h2>
+          <p style={{ margin: 0, fontSize: 14 }}>{errorMsg}</p>
+          <p style={{ marginTop: 16, fontSize: 13, color: colors.dark }}>Firestore kurallarını veya veritabanı bağlantısını kontrol edin.</p>
+        </div>
       </div>
     );
   }

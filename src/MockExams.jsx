@@ -60,6 +60,7 @@ export default function MockExams() {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
     const [userType, setUserType] = useState("yks");
 
     // Form State
@@ -87,6 +88,8 @@ export default function MockExams() {
                 await fetchExams(user.uid);
             } catch (error) {
                 console.error("Error fetching user data:", error);
+                setErrorMsg(error.message || "Erişim hatası.");
+                setLoading(false);
             }
         };
         fetchUserDataAndExams();
@@ -105,6 +108,7 @@ export default function MockExams() {
             setExams(list);
         } catch (error) {
             console.error("Error fetching mock exams:", error);
+            setErrorMsg(error.message || "Denemeler yüklenirken hata oluştu.");
         } finally {
             setLoading(false);
         }
@@ -349,6 +353,18 @@ export default function MockExams() {
             </div>
         );
     };
+
+    if (errorMsg) {
+        return (
+            <div style={{ padding: "40px 24px", maxWidth: 1000, margin: "0 auto", textAlign: "center" }}>
+                <div style={{ background: colors.dangerLight, color: colors.danger, padding: "24px 32px", borderRadius: 16, display: "inline-block" }}>
+                    <h2 style={{ margin: "0 0 12px 0" }}>⚠️ Bir Hata Oluştu</h2>
+                    <p style={{ margin: 0, fontSize: 14 }}>{errorMsg}</p>
+                    <p style={{ marginTop: 16, fontSize: 13, color: colors.dark }}>Firestore kurallarını veya veritabanı bağlantısını kontrol edin.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: "40px 24px", maxWidth: 1000, margin: "0 auto" }}>
