@@ -79,9 +79,9 @@ Lütfen doğrudan çözümle başla, kendini tanıtmaya gerek yok.
         ];
 
         // 4. Call Gemini directly
-        // Using gemini-1.5-flash as it is extremely fast and natively supports multimodal vision inputs
+        // Using gemini-2.5-flash as it natively supports multimodal vision inputs
         const { text } = await callGemini({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             system: systemInstruction,
             messages: messages,
         });
