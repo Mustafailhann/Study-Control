@@ -204,61 +204,6 @@ async function seed() {
   });
   console.log("✅ TYT Geometri eklendi");
 
-  // TYT Fizik
-  await setDoc(doc(db, "subjects", "yks_tyt_fizik"), {
-    exam: "yks",
-    level: "tyt",
-    name: "Fizik",
-    topics: [
-      "Fizik Bilimine Giriş",
-      "Madde ve Özellikleri",
-      "Hareket",
-      "Newton'un Hareket Yasaları",
-      "Basınç",
-      "Kaldırma Kuvveti",
-      "Dalgalar",
-      "Optik",
-      "Elektrostatik",
-      "Elektrik ve Manyetizma"
-    ]
-  });
-  console.log("✅ TYT Fizik eklendi");
-
-  // TYT Kimya
-  await setDoc(doc(db, "subjects", "yks_tyt_kimya"), {
-    exam: "yks",
-    level: "tyt",
-    name: "Kimya",
-    topics: [
-      "Kimya Bilimi",
-      "Atom ve Periyodik Sistem",
-      "Kimyasal Türler Arası Etkileşimler",
-      "Maddenin Halleri",
-      "Doğa ve Kimya",
-      "Karışımlar",
-      "Kimyasal Tepkimeler",
-      "Asitler, Bazlar ve Tuzlar"
-    ]
-  });
-  console.log("✅ TYT Kimya eklendi");
-
-  // TYT Biyoloji
-  await setDoc(doc(db, "subjects", "yks_tyt_biyoloji"), {
-    exam: "yks",
-    level: "tyt",
-    name: "Biyoloji",
-    topics: [
-      "Yaşam Bilimi Biyoloji",
-      "Hücre",
-      "Canlıların Sınıflandırılması",
-      "Mitoz ve Mayoz Bölünme",
-      "Kalıtım",
-      "Ekosistem Ekolojisi",
-      "Güncel Çevre Sorunları"
-    ]
-  });
-  console.log("✅ TYT Biyoloji eklendi");
-
   // TYT Tarih
   await setDoc(doc(db, "subjects", "yks_tyt_tarih"), {
     exam: "yks",
@@ -441,77 +386,6 @@ async function seed() {
     ]
   });
   console.log("✅ AYT Matematik eklendi");
-
-  // AYT Fizik
-  await setDoc(doc(db, "subjects", "yks_ayt_fizik"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Fizik",
-    topics: [
-      "Elektrik ve Manyetizma",
-      "Elektriksel Kuvvet ve Alan",
-      "Elektriksel Potansiyel",
-      "Kondansatörler",
-      "Elektrik Akımı",
-      "Manyetizma",
-      "Elektromanyetik İndüklenme",
-      "Alternatif Akım",
-      "Çembersel Hareket",
-      "Basit Harmonik Hareket",
-      "Dalga Mekaniği",
-      "Atom Fiziği",
-      "Modern Fizik"
-    ]
-  });
-  console.log("✅ AYT Fizik eklendi");
-
-  // AYT Kimya
-  await setDoc(doc(db, "subjects", "yks_ayt_kimya"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Kimya",
-    topics: [
-      "Modern Atom Teorisi",
-      "Gazlar",
-      "Sıvı Çözeltiler ve Çözünürlük",
-      "Kimyasal Tepkimelerde Enerji",
-      "Kimyasal Tepkimelerde Hız",
-      "Kimyasal Tepkimelerde Denge",
-      "Asit Baz Dengeleri",
-      "Çözünürlük Dengeleri",
-      "Elektrokimya",
-      "Nükleeer Kimya",
-      "Organik Kimya",
-      "Enerji Kaynakları ve Bilimsel Gelişmeler"
-    ]
-  });
-  console.log("✅ AYT Kimya eklendi");
-
-  // AYT Biyoloji
-  await setDoc(doc(db, "subjects", "yks_ayt_biyoloji"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Biyoloji",
-    topics: [
-      "Komünite ve Popülasyon Ekolojisi",
-      "Canlıların Sınıflandırılması",
-      "Bitki Biyolojisi",
-      "Hayvan Biyolojisi",
-      "İnsan Fizyolojisi",
-      "Duyu Organları",
-      "Destek ve Hareket Sistemi",
-      "Sinir Sistemi",
-      "Endokrin Sistem",
-      "Dolaşım Sistemi",
-      "Solunum Sistemi",
-      "Sindirim Sistemi",
-      "Boşaltım Sistemi",
-      "Üreme Sistemi",
-      "Kalıtım",
-      "Canlılarda Enerji Dönüşümleri"
-    ]
-  });
-  console.log("✅ AYT Biyoloji eklendi");
 
   // AYT Edebiyat
   await setDoc(doc(db, "subjects", "yks_ayt_edebiyat"), {
