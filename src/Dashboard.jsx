@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, doc, updateDoc, getDoc, query, where } from "firebase/firestore";
 import { db, auth } from "./firebase";
+import { processGamification, BADGES, calculateLevel, getNextLevelXp } from "./gamification";
 
 // Modern renk paleti
 const colors = {
@@ -33,6 +34,9 @@ export default function Dashboard({ filter = "all" }) {
   const [partnerStats, setPartnerStats] = useState(null);
   const [showPartnerModal, setShowPartnerModal] = useState(false);
 
+  // Gamification state
+  const [userGamification, setUserGamification] = useState({ xp: 0, level: 1, badges: [] });
+
   // Partner tanımları - farklı yazım biçimlerini destekle
   const PARTNERS = {
     songul: { name: "Mustafa", type: "mufettislik", exam: "ziraat" },
@@ -50,7 +54,7 @@ export default function Dashboard({ filter = "all" }) {
       .replace(/ı/g, 'i')
       .replace(/ğ/g, 'g')
       .replace(/ç/g, 'c');
-    
+
     if (normalized.includes('songul') || normalized.includes('songül')) {
       return { name: "Mustafa", type: "mufettislik", exam: "ziraat" };
     }
@@ -70,14 +74,19 @@ export default function Dashboard({ filter = "all" }) {
         const userData = userDoc.data();
         setUserType(userData.userType);
         setUserName(userData.username);
-        
+        setUserGamification({
+          xp: userData.xp || 0,
+          level: calculateLevel(userData.xp || 0),
+          badges: userData.badges || []
+        });
+
         const examType = userData.userType === "mufettislik" ? "ziraat" : "yks";
-        
+
         const q = query(
           collection(db, "subjects"),
           where("exam", "==", examType)
         );
-        
+
         const snap = await getDocs(q);
         const list = snap.docs.map(d => ({
           id: d.id,
@@ -89,7 +98,7 @@ export default function Dashboard({ filter = "all" }) {
         // Partner verilerini çek
         await fetchPartnerStats(userData.username);
       }
-      
+
       setLoading(false);
     }
 
@@ -129,7 +138,7 @@ export default function Dashboard({ filter = "all" }) {
         s.topics.forEach((topicName, i) => {
           const details = s.topicDetails[i] || {};
           if (details.completed) completedTopics++;
-          
+
           const logs = details.logs || [];
           logs.forEach(log => {
             allLogs.push({
@@ -199,9 +208,17 @@ export default function Dashboard({ filter = "all" }) {
   const addStudyLog = async (subjectId, topicIndex) => {
     const key = `${subjectId}_${topicIndex}`;
     const logData = newLog[key];
-    
+
     if (!logData || (!logData.solved && !logData.correct && !logData.wrong)) {
       alert("Lütfen en az bir değer girin!");
+      return;
+    }
+
+    const solvedInt = parseInt(logData.solved || 0);
+
+    // Anti-farming limit
+    if (solvedInt > 300) {
+      alert("⚠️ Tek seferde en fazla 300 soru girebilirsiniz (Anti-farming 🛡️).");
       return;
     }
 
@@ -240,6 +257,19 @@ export default function Dashboard({ filter = "all" }) {
     // Formu temizle ve kapat
     setNewLog(prev => ({ ...prev, [key]: {} }));
     setShowAddLog(prev => ({ ...prev, [key]: false }));
+
+    // Trigger gamification (1 question = 10 XP)
+    if (solvedInt > 0 && auth.currentUser) {
+      const xpToAdd = solvedInt * 10;
+      const res = await processGamification(auth.currentUser.uid, xpToAdd, { type: "question", count: solvedInt });
+      if (res) {
+        setUserGamification({ xp: res.newXP, level: res.newLevel, badges: res.newBadgesUnlocked.concat(userGamification.badges) }); // Local quick update
+        if (res.newBadgesUnlocked && res.newBadgesUnlocked.length > 0) {
+          const names = res.newBadgesUnlocked.map(b => `${b.icon} ${b.name}`).join(", ");
+          alert(`🎉 TEBRİKLER! Yeni rozet(ler) kazandın: ${names}`);
+        }
+      }
+    }
   };
 
   // Çalışma kaydı sil
@@ -291,7 +321,7 @@ export default function Dashboard({ filter = "all" }) {
         s.topics.forEach((_, i) => {
           const details = s.topicDetails[i] || {};
           if (details.completed) completedTopics++;
-          
+
           const topicStats = getTopicStats(details);
           totalSolved += topicStats.totalSolved;
           totalCorrect += topicStats.totalCorrect;
@@ -310,8 +340,8 @@ export default function Dashboard({ filter = "all" }) {
   // Tarih formatlama
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('tr-TR', { 
-      day: 'numeric', 
+    return date.toLocaleDateString('tr-TR', {
+      day: 'numeric',
       month: 'short',
       hour: '2-digit',
       minute: '2-digit'
@@ -343,7 +373,7 @@ export default function Dashboard({ filter = "all" }) {
   // Filtreye göre konuları filtrele
   const getFilteredSubjects = () => {
     if (filter === "all") return subjects;
-    
+
     return subjects.map(s => {
       const filteredTopics = s.topics.filter((_, i) => {
         const details = s.topicDetails[i] || {};
@@ -351,25 +381,25 @@ export default function Dashboard({ filter = "all" }) {
         if (filter === "shouldStudy") return details.shouldStudy === true;
         return true;
       });
-      
+
       return { ...s, filteredTopics };
     }).filter(s => s.filteredTopics.length > 0);
   };
 
   const filteredSubjects = getFilteredSubjects();
 
-  const filterTitle = filter === "completed" 
-    ? "Tamamlananlar" 
-    : filter === "shouldStudy" 
-      ? "Çalışılması Gerekenler" 
+  const filterTitle = filter === "completed"
+    ? "Tamamlananlar"
+    : filter === "shouldStudy"
+      ? "Çalışılması Gerekenler"
       : "Tüm Konular";
 
-  const categoryTitle = userType === "mufettislik" 
-    ? "Müfettişlik" 
+  const categoryTitle = userType === "mufettislik"
+    ? "Müfettişlik"
     : "YKS";
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: "100vh",
       background: `linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)`,
       padding: "24px"
@@ -385,11 +415,14 @@ export default function Dashboard({ filter = "all" }) {
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700 }}>
+            <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               Merhaba, {userName}! 👋
+              <span style={{ fontSize: 14, background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: 20 }}>
+                Seviye {userGamification.level}
+              </span>
             </h1>
             <p style={{ margin: "8px 0 0", opacity: 0.9, fontSize: 16 }}>
-              {categoryTitle} • {filterTitle}
+              {categoryTitle} • {filterTitle} • {userGamification.xp} XP
             </p>
           </div>
           <div style={{
@@ -423,11 +456,11 @@ export default function Dashboard({ filter = "all" }) {
         </div>
 
         {/* Stats Cards */}
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", 
-          gap: 12, 
-          marginTop: 24 
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+          gap: 12,
+          marginTop: 24
         }}>
           {[
             { label: "Toplam Konu", value: stats.totalTopics, icon: "📚" },
@@ -452,9 +485,45 @@ export default function Dashboard({ filter = "all" }) {
         </div>
       </div>
 
+      {/* Badges Section */}
+      <div style={{ marginBottom: 24, padding: "24px", background: colors.white, borderRadius: 20, boxShadow: colors.cardShadow }}>
+        <h3 style={{ margin: "0 0 16px 0", color: colors.dark, fontSize: 18, display: "flex", alignItems: "center", gap: 8 }}>
+          🏆 Başarılarım (Rozetler)
+        </h3>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          {Object.values(BADGES).map(badge => {
+            const isUnlocked = userGamification.badges.includes(badge.id);
+            return (
+              <div
+                key={badge.id}
+                style={{
+                  background: isUnlocked ? "rgba(99, 102, 241, 0.05)" : colors.grayLight,
+                  border: `1px solid ${isUnlocked ? "rgba(99, 102, 241, 0.2)" : "rgba(0,0,0,0.05)"}`,
+                  padding: "12px 16px",
+                  borderRadius: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  opacity: isUnlocked ? 1 : 0.5,
+                  filter: isUnlocked ? "none" : "grayscale(100%)",
+                  minWidth: 220,
+                  flex: 1
+                }}
+              >
+                <div style={{ fontSize: 32 }}>{badge.icon}</div>
+                <div>
+                  <div style={{ fontWeight: 700, color: isUnlocked ? colors.primaryDark : colors.gray, fontSize: 15 }}>{badge.name}</div>
+                  <div style={{ fontSize: 12, color: colors.gray, marginTop: 4 }}>{badge.desc}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Partner Stats Card */}
       {partnerStats && (
-        <div 
+        <div
           onClick={() => setShowPartnerModal(true)}
           style={{
             background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
@@ -487,11 +556,11 @@ export default function Dashboard({ filter = "all" }) {
                 📊 {partnerStats.completedTopics}/{partnerStats.totalTopics} konu tamamlandı
               </div>
             </div>
-            
+
             <div style={{ display: "flex", gap: 16 }}>
-              <div style={{ 
-                background: "rgba(255,255,255,0.2)", 
-                padding: "12px 16px", 
+              <div style={{
+                background: "rgba(255,255,255,0.2)",
+                padding: "12px 16px",
                 borderRadius: 12,
                 textAlign: "center",
                 minWidth: 80
@@ -500,9 +569,9 @@ export default function Dashboard({ filter = "all" }) {
                 <div style={{ fontSize: 20, fontWeight: 700 }}>{partnerStats.today.solved}</div>
                 <div style={{ fontSize: 10, opacity: 0.8 }}>soru</div>
               </div>
-              <div style={{ 
-                background: "rgba(255,255,255,0.2)", 
-                padding: "12px 16px", 
+              <div style={{
+                background: "rgba(255,255,255,0.2)",
+                padding: "12px 16px",
                 borderRadius: 12,
                 textAlign: "center",
                 minWidth: 80
@@ -511,9 +580,9 @@ export default function Dashboard({ filter = "all" }) {
                 <div style={{ fontSize: 20, fontWeight: 700 }}>{partnerStats.week.solved}</div>
                 <div style={{ fontSize: 10, opacity: 0.8 }}>soru</div>
               </div>
-              <div style={{ 
-                background: "rgba(255,255,255,0.2)", 
-                padding: "12px 16px", 
+              <div style={{
+                background: "rgba(255,255,255,0.2)",
+                padding: "12px 16px",
                 borderRadius: 12,
                 textAlign: "center",
                 minWidth: 80
@@ -532,7 +601,7 @@ export default function Dashboard({ filter = "all" }) {
 
       {/* Partner Detail Modal */}
       {showPartnerModal && partnerStats && (
-        <div 
+        <div
           style={{
             position: "fixed",
             top: 0,
@@ -548,7 +617,7 @@ export default function Dashboard({ filter = "all" }) {
           }}
           onClick={() => setShowPartnerModal(false)}
         >
-          <div 
+          <div
             style={{
               background: colors.white,
               borderRadius: 20,
@@ -587,9 +656,9 @@ export default function Dashboard({ filter = "all" }) {
             </div>
 
             {/* Period Stats */}
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "repeat(3, 1fr)", 
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
               gap: 12,
               marginBottom: 24
             }}>
@@ -598,7 +667,7 @@ export default function Dashboard({ filter = "all" }) {
                 { label: "Son 7 Gün", data: partnerStats.week, color: "#6366f1" },
                 { label: "Son 30 Gün", data: partnerStats.month, color: "#f59e0b" }
               ].map((period, i) => (
-                <div 
+                <div
                   key={i}
                   style={{
                     background: colors.grayLight,
@@ -614,9 +683,9 @@ export default function Dashboard({ filter = "all" }) {
                     {period.data.solved}
                   </div>
                   <div style={{ fontSize: 12, color: colors.gray }}>soru çözüldü</div>
-                  <div style={{ 
-                    display: "flex", 
-                    gap: 12, 
+                  <div style={{
+                    display: "flex",
+                    gap: 12,
                     marginTop: 8,
                     fontSize: 12
                   }}>
@@ -631,9 +700,9 @@ export default function Dashboard({ filter = "all" }) {
             </div>
 
             {/* Progress */}
-            <div style={{ 
-              background: colors.grayLight, 
-              borderRadius: 12, 
+            <div style={{
+              background: colors.grayLight,
+              borderRadius: 12,
               padding: 16,
               marginBottom: 24
             }}>
@@ -663,18 +732,18 @@ export default function Dashboard({ filter = "all" }) {
 
             {/* Recent Activity */}
             <div>
-              <div style={{ 
-                fontSize: 14, 
-                fontWeight: 600, 
-                color: colors.dark, 
-                marginBottom: 12 
+              <div style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: colors.dark,
+                marginBottom: 12
               }}>
                 📜 Son Aktiviteler
               </div>
               {partnerStats.recentLogs.length === 0 ? (
-                <div style={{ 
-                  textAlign: "center", 
-                  padding: 24, 
+                <div style={{
+                  textAlign: "center",
+                  padding: 24,
                   color: colors.gray,
                   background: colors.grayLight,
                   borderRadius: 12
@@ -682,15 +751,15 @@ export default function Dashboard({ filter = "all" }) {
                   Henüz çalışma kaydı yok
                 </div>
               ) : (
-                <div style={{ 
-                  maxHeight: 250, 
+                <div style={{
+                  maxHeight: 250,
                   overflow: "auto",
                   background: colors.grayLight,
                   borderRadius: 12,
                   padding: 8
                 }}>
                   {partnerStats.recentLogs.map((log, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       style={{
                         display: "flex",
@@ -732,9 +801,9 @@ export default function Dashboard({ filter = "all" }) {
 
       {/* Empty State */}
       {filteredSubjects.length === 0 && (
-        <div style={{ 
-          padding: 60, 
-          textAlign: "center", 
+        <div style={{
+          padding: 60,
+          textAlign: "center",
           background: colors.glassBackground,
           borderRadius: 20,
           boxShadow: colors.cardShadow
@@ -765,7 +834,7 @@ export default function Dashboard({ filter = "all" }) {
             solved: 0,
             correct: 0
           };
-          
+
           s.topics?.forEach((_, i) => {
             const d = s.topicDetails[i] || {};
             if (d.completed) subjectStats.completed++;
@@ -774,8 +843,8 @@ export default function Dashboard({ filter = "all" }) {
             subjectStats.correct += ts.totalCorrect;
           });
 
-          const subjectProgress = subjectStats.total > 0 
-            ? Math.round((subjectStats.completed / subjectStats.total) * 100) 
+          const subjectProgress = subjectStats.total > 0
+            ? Math.round((subjectStats.completed / subjectStats.total) * 100)
             : 0;
 
           return (
@@ -802,8 +871,8 @@ export default function Dashboard({ filter = "all" }) {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <div style={{ 
-                      fontSize: 11, 
+                    <div style={{
+                      fontSize: 11,
                       fontWeight: 600,
                       textTransform: "uppercase",
                       letterSpacing: 1,
@@ -853,9 +922,9 @@ export default function Dashboard({ filter = "all" }) {
                 </div>
 
                 {/* Quick Stats */}
-                <div style={{ 
-                  display: "flex", 
-                  gap: 16, 
+                <div style={{
+                  display: "flex",
+                  gap: 16,
                   marginTop: 12,
                   fontSize: 12
                 }}>
@@ -872,7 +941,7 @@ export default function Dashboard({ filter = "all" }) {
                     const topicStats = getTopicStats(details);
                     const logs = details.logs || [];
                     const key = `${s.id}_${i}`;
-                    
+
                     if (filter === "completed" && !details.completed) return null;
                     if (filter === "shouldStudy" && !details.shouldStudy) return null;
 
@@ -886,23 +955,23 @@ export default function Dashboard({ filter = "all" }) {
                           padding: 16,
                           borderRadius: 12,
                           background: colors.white,
-                          border: details.completed 
-                            ? `2px solid ${colors.success}` 
-                            : details.shouldStudy 
-                              ? `2px solid ${colors.warning}` 
+                          border: details.completed
+                            ? `2px solid ${colors.success}`
+                            : details.shouldStudy
+                              ? `2px solid ${colors.warning}`
                               : "1px solid #e5e7eb",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
                         }}
                       >
                         {/* Topic Header */}
-                        <div style={{ 
-                          display: "flex", 
-                          justifyContent: "space-between", 
+                        <div style={{
+                          display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
                           marginBottom: 12
                         }}>
-                          <div style={{ 
-                            fontWeight: 600, 
+                          <div style={{
+                            fontWeight: 600,
                             fontSize: 15,
                             color: colors.dark,
                             display: "flex",
@@ -915,8 +984,8 @@ export default function Dashboard({ filter = "all" }) {
                         </div>
 
                         {/* Checkboxes & Stats Summary */}
-                        <div style={{ 
-                          display: "flex", 
+                        <div style={{
+                          display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
                           marginBottom: 12,
@@ -924,9 +993,9 @@ export default function Dashboard({ filter = "all" }) {
                           gap: 8
                         }}>
                           <div style={{ display: "flex", gap: 8 }}>
-                            <label style={{ 
-                              display: "flex", 
-                              alignItems: "center", 
+                            <label style={{
+                              display: "flex",
+                              alignItems: "center",
                               gap: 6,
                               cursor: "pointer",
                               padding: "6px 12px",
@@ -944,9 +1013,9 @@ export default function Dashboard({ filter = "all" }) {
                               Tamamlandı
                             </label>
 
-                            <label style={{ 
-                              display: "flex", 
-                              alignItems: "center", 
+                            <label style={{
+                              display: "flex",
+                              alignItems: "center",
                               gap: 6,
                               cursor: "pointer",
                               padding: "6px 12px",
@@ -967,16 +1036,16 @@ export default function Dashboard({ filter = "all" }) {
 
                           {/* Summary Stats */}
                           {topicStats.totalSolved > 0 && (
-                            <div style={{ 
-                              display: "flex", 
-                              gap: 12, 
+                            <div style={{
+                              display: "flex",
+                              gap: 12,
                               fontSize: 12,
-                              color: colors.gray 
+                              color: colors.gray
                             }}>
                               <span>📝 {topicStats.totalSolved}</span>
                               <span style={{ color: colors.success }}>✓ {topicStats.totalCorrect}</span>
                               <span style={{ color: colors.danger }}>✗ {topicStats.totalWrong}</span>
-                              <span style={{ 
+                              <span style={{
                                 background: colors.primaryLight,
                                 color: colors.white,
                                 padding: "2px 8px",
@@ -992,24 +1061,24 @@ export default function Dashboard({ filter = "all" }) {
                         {/* Study Logs */}
                         {logs.length > 0 && (
                           <div style={{ marginBottom: 12 }}>
-                            <div style={{ 
-                              fontSize: 12, 
-                              fontWeight: 600, 
+                            <div style={{
+                              fontSize: 12,
+                              fontWeight: 600,
                               color: colors.gray,
-                              marginBottom: 8 
+                              marginBottom: 8
                             }}>
                               📊 Çalışma Geçmişi ({logs.length} kayıt)
                             </div>
-                            <div style={{ 
-                              maxHeight: 200, 
+                            <div style={{
+                              maxHeight: 200,
                               overflowY: "auto",
                               background: colors.grayLight,
                               borderRadius: 8,
                               padding: 8
                             }}>
                               {logs.slice().reverse().map((log, idx) => (
-                                <div 
-                                  key={log.id} 
+                                <div
+                                  key={log.id}
                                   style={{
                                     display: "flex",
                                     justifyContent: "space-between",
@@ -1091,19 +1160,19 @@ export default function Dashboard({ filter = "all" }) {
                             borderRadius: 10,
                             padding: 16
                           }}>
-                            <div style={{ 
-                              fontSize: 13, 
-                              fontWeight: 600, 
+                            <div style={{
+                              fontSize: 13,
+                              fontWeight: 600,
                               marginBottom: 12,
-                              color: colors.dark 
+                              color: colors.dark
                             }}>
                               ✏️ Yeni Çalışma Kaydı
                             </div>
-                            
+
                             {/* Input Row */}
-                            <div style={{ 
-                              display: "grid", 
-                              gridTemplateColumns: "repeat(3, 1fr)", 
+                            <div style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(3, 1fr)",
                               gap: 8,
                               marginBottom: 10
                             }}>

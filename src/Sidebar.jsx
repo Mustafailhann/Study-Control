@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import { calculateLevel, getNextLevelXp } from "./gamification";
 
 const colors = {
   primary: "#6366f1",
@@ -18,10 +20,29 @@ export default function Sidebar({ filter, setFilter, onAIClick, onReportClick })
   const menuItems = [
     { id: "all", label: "Tüm Konular", icon: "📚", count: null },
     { id: "completed", label: "Tamamlananlar", icon: "✅", count: null },
-    { id: "shouldStudy", label: "Tekrar Edilecek", icon: "🔄", count: null }
+    { id: "shouldStudy", label: "Tekrar Edilecek", icon: "🔄", count: null },
+    { id: "mistakes", label: "Yanlış Defterim", icon: "📸", count: null },
+    { id: "mockExams", label: "Denemelerim", icon: "📊", count: null },
+    { id: "pomodoro", label: "Odak Odası", icon: "⏱️", count: null }
   ];
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [userGamification, setUserGamification] = useState({ xp: 0, level: 1 });
+
+  useEffect(() => {
+    // Listen to user XP changes
+    let unsubscribe = () => { };
+    if (auth.currentUser) {
+      unsubscribe = onSnapshot(doc(db, "users", auth.currentUser.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const xp = data.xp || 0;
+          setUserGamification({ xp, level: calculateLevel(xp) });
+        }
+      });
+    }
+    return () => unsubscribe();
+  }, [auth.currentUser]);
 
   useEffect(() => {
     // YKS 2026 (Tahmini: 20 Haziran 2026 10:15)
@@ -85,6 +106,24 @@ export default function Sidebar({ filter, setFilter, onAIClick, onReportClick })
         }}>
           Hedefine odaklan, başarıya ulaş
         </p>
+
+        {/* Level and XP Bar */}
+        <div style={{ marginTop: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: colors.white }}>Seviye {userGamification.level}</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>
+              {userGamification.xp} / {getNextLevelXp(userGamification.level)} XP
+            </span>
+          </div>
+          <div style={{ height: 6, background: "rgba(255,255,255,0.2)", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{
+              height: "100%",
+              background: "#10b981", // Success green
+              width: `${Math.min(100, (userGamification.xp / getNextLevelXp(userGamification.level)) * 100)}%`,
+              transition: "width 0.5s ease"
+            }} />
+          </div>
+        </div>
       </div>
 
       {/* Menu */}

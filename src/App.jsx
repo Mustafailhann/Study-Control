@@ -6,6 +6,9 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Sidebar from "./Sidebar";
 import AIChat from "./AIChat";
+import MistakeBook from "./MistakeBook";
+import Pomodoro from "./Pomodoro";
+import MockExams from "./MockExams";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -53,9 +56,14 @@ export default function App() {
         </div>
 
         {/* CONTENT */}
-        <div style={{ flex: 1, overflow: "auto" }}>
+        <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
           <Routes>
-            <Route path="/" element={<Dashboard filter={filter} />} />
+            <Route path="/" element={
+              filter === "mistakes" ? <MistakeBook /> :
+                filter === "pomodoro" ? <Pomodoro /> :
+                  filter === "mockExams" ? <MockExams userType={user.userType} /> :
+                    <Dashboard filter={filter} />
+            } />
           </Routes>
         </div>
 

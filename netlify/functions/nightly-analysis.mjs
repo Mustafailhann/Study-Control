@@ -45,8 +45,21 @@ function buildStatsFromLogs(logs, startDate) {
   return { ...totals, accuracy };
 }
 
-async function buildUserSummaryForReport({ db, userType }) {
+async function buildUserSummaryForReport({ db, userType, uid }) {
   const examType = userType === "mufettislik" ? "ziraat" : "yks";
+
+  let userGamification = { level: 1, xp: 0, badges: [] };
+  if (uid) {
+    const userDoc = await db.collection("users").doc(uid).get();
+    if (userDoc.exists) {
+      const data = userDoc.data();
+      userGamification = {
+        level: Math.floor(Math.sqrt((data.xp || 0) / 10)) + 1,
+        xp: data.xp || 0,
+        badges: data.badges || []
+      };
+    }
+  }
 
   const subjectsSnap = await db
     .collection("subjects")
@@ -116,7 +129,20 @@ async function buildUserSummaryForReport({ db, userType }) {
   const last30Start = new Date(todayStart);
   last30Start.setDate(last30Start.getDate() - 30);
 
+  let todayPomodoroMinutes = 0;
+  if (uid) {
+    const pomodorosSnap = await db.collection("pomodoros").where("uid", "==", uid).get();
+    pomodorosSnap.forEach(doc => {
+      const data = doc.data();
+      const created = new Date(data.createdAt);
+      if (created >= todayStart && data.type === "work") {
+        todayPomodoroMinutes += data.minutes || 0;
+      }
+    });
+  }
+
   const today = buildStatsFromLogs(allLogs, todayStart);
+  today.pomodoroMinutes = todayPomodoroMinutes;
   const last7 = buildStatsFromLogs(allLogs, last7Start);
   const last30 = buildStatsFromLogs(allLogs, last30Start);
 
@@ -150,6 +176,8 @@ async function buildUserSummaryForReport({ db, userType }) {
     strongTopics,
     unstudiedTopics,
     recentActivities: allLogs.slice(0, 15),
+    recentMockExams,
+    gamification: userGamification
   };
 }
 
@@ -167,7 +195,7 @@ export const handler = async (event) => {
       const userType = user?.userType || "yks";
       const username = user?.username || "Kullanıcı";
 
-      const summary = await buildUserSummaryForReport({ db, userType });
+      const summary = await buildUserSummaryForReport({ db, userType, uid });
 
       const system = `
 Sen bir sınav koçusun. Dil: Türkçe.
@@ -175,7 +203,9 @@ Bugünün tarihinde (${dateKey}) kullanıcının ${userType === "mufettislik" ? 
 Çıktı MUTLAKA JSON formatında olmalı.
 Kural: Veride olmayan şeyi uydurma. Eksik veri varsa "questions" alanında sor.
 Kural: Öneriler ölçülebilir olsun (hedef soru sayısı, hangi konular, kaç gün).
+Kural: Kullanıcının eğer son eklenen "recentMockExams" verisi varsa, bu sonuçlardaki netlerin artış veya azalış trendini spesifik branşlar bazında (Örn: Türkçen artıyor ama Matematik duraksamış) mutlaka yorumla ve eylem planı sun.
 Kural: Her önerinin yanında kısa gerekçe olsun.
+Kural: Eğer kullanıcının kazandığı yeni rozetleri veya etkileyici bir seviyesi (Level) varsa raporun başında onu özellikle tebrik et.
 Kural: Samimi, destekleyici ve motive edici bir dil kullan.
 `.trim();
 
