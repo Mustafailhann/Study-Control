@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "./firebase";
-import { collection, addDoc, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
 import { processGamification } from "./gamification";
 
 const colors = {
@@ -56,32 +56,48 @@ const BRANCH_SUBJECTS_ZIRAAT = [
 
 const ALL_BRANCH_SUBJECTS = [...BRANCH_SUBJECTS_YKS, ...BRANCH_SUBJECTS_ZIRAAT];
 
-export default function MockExams({ userType }) {
+export default function MockExams() {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [userType, setUserType] = useState("yks");
 
     // Form State
     const [showForm, setShowForm] = useState(false);
-    const defaultType = userType === "mufettislik" ? "ziraat" : "tyt";
-    const [formType, setFormType] = useState(defaultType);
+    const [formType, setFormType] = useState("tyt");
     const [formDate, setFormDate] = useState(new Date().toISOString().split("T")[0]);
     const [branchSubject, setBranchSubject] = useState(userType === "mufettislik" ? "ziraat_alan" : "tyt_math");
     const [useOsymRule, setUseOsymRule] = useState(true); // 4 mistakes = 1 correct penalty
     const [scores, setScores] = useState({});
 
     useEffect(() => {
-        fetchExams();
-    }, [userType]);
+        const fetchUserDataAndExams = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
 
-    const fetchExams = async () => {
-        const user = auth.currentUser;
-        if (!user) return;
+            try {
+                // Fetch userType from users collection
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const type = userDoc.data().userType || "yks";
+                    setUserType(type);
+                    setFormType(type === "mufettislik" ? "ziraat" : "tyt");
+                    setBranchSubject(type === "mufettislik" ? "ziraat_alan" : "tyt_math");
+                }
+                await fetchExams(user.uid);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+        fetchUserDataAndExams();
+    }, []);
+
+    const fetchExams = async (uid) => {
 
         try {
             const q = query(
                 collection(db, "mock_exams"),
-                where("uid", "==", user.uid),
+                where("uid", "==", uid),
                 orderBy("date", "desc")
             );
             const snap = await getDocs(q);
@@ -186,7 +202,7 @@ export default function MockExams({ userType }) {
             // Reset form
             setScores({});
             setShowForm(false);
-            fetchExams(); // Refresh list
+            fetchExams(user.uid); // Refresh list
 
         } catch (error) {
             console.error("Deneme eklenirken hata:", error);

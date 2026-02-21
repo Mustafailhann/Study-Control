@@ -61,7 +61,7 @@ export default function App() {
             <Route path="/" element={
               filter === "mistakes" ? <MistakeBook /> :
                 filter === "pomodoro" ? <Pomodoro /> :
-                  filter === "mockExams" ? <MockExams userType={user.userType} /> :
+                  filter === "mockExams" ? <MockExams /> :
                     <Dashboard filter={filter} />
             } />
           </Routes>

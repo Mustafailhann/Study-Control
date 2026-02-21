@@ -41,7 +41,6 @@ export default function Dashboard({ filter = "all" }) {
   const PARTNERS = {
     songul: { name: "Mustafa", type: "mufettislik", exam: "ziraat" },
     songül: { name: "Mustafa", type: "mufettislik", exam: "ziraat" },
-    "songül": { name: "Mustafa", type: "mufettislik", exam: "ziraat" },
     mustafa: { name: "Songül", type: "yks", exam: "yks" }
   };
 
