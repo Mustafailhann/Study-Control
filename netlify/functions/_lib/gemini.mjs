@@ -10,7 +10,7 @@ export async function callGemini({ model, system, messages, responseMimeType }) 
     systemInstruction: system ? { parts: [{ text: system }] } : undefined,
     contents: messages.map((m) => ({
       role: m.role, // "user" | "model"
-      parts: [{ text: m.content }],
+      parts: Array.isArray(m.content) ? m.content : [{ text: m.content }],
     })),
     generationConfig: {
       temperature: 0.4,

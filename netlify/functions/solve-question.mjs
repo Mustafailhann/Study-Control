@@ -67,11 +67,10 @@ Lütfen doğrudan çözümle başla, kendini tanıtmaya gerek yok.
             {
                 role: "user",
                 content: [
-                    { type: "text", text: userText },
+                    { text: userText },
                     {
-                        type: "inline_data",
-                        inline_data: {
-                            mime_type: mimeType,
+                        inlineData: {
+                            mimeType: mimeType,
                             data: b64Data
                         }
                     }
