@@ -32,6 +32,9 @@ export const processGamification = async (uid, xpToAdd, actionData = {}) => {
     const userRef = doc(db, "users", uid);
     const snap = await getDoc(userRef);
 
+    let userData = snap.exists() ? snap.data() : {};
+    let currentXP = userData.xp || 0;
+    let badges = userData.badges || [];
     let stats = userData.gamificationStats || { pomodorosTotal: 0, lastPomodoroDate: null, pomodoroStreak: 0, mockExamsTotal: 0 };
 
     // 1. Add XP
