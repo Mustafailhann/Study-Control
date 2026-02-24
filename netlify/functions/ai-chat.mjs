@@ -54,11 +54,20 @@ async function buildUserSummary({ db, userType }) {
 
   const allLogs = [];
   const perTopic = [];
+  const allSubjects = [];
 
   subjectsSnap.forEach((doc) => {
     const data = doc.data();
     const topics = Array.isArray(data.topics) ? data.topics : [];
     const topicDetails = data.topicDetails || {};
+
+    allSubjects.push({
+      subjectName: data.name,
+      topics: topics.map((t, i) => ({
+        name: t,
+        completed: !!(topicDetails[i] && topicDetails[i].completed)
+      }))
+    });
 
     totalTopics += topics.length;
 
@@ -131,6 +140,7 @@ async function buildUserSummary({ db, userType }) {
     last30,
     weakTopics,
     recentActivities: allLogs.slice(0, 12),
+    allSubjects,
   };
 }
 
