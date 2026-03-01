@@ -383,9 +383,20 @@ export default function Dashboard({ filter = "all" }) {
 
   // Filtreye göre konuları filtrele
   const getFilteredSubjects = () => {
-    if (filter === "all") return subjects;
+    // 1. First, completely remove passive subjects from any view
+    const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
+    const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi"];
 
-    return subjects.map(s => {
+    const activeSubjects = subjects.filter(s => {
+      if (passiveSubjectIds.includes(s.id)) return false;
+      if (s.level === "ayt" && passiveNames.includes(s.name)) return false;
+      return true;
+    });
+
+    // 2. Then apply the user's selected filter ("all", "completed", "shouldStudy")
+    if (filter === "all") return activeSubjects;
+
+    return activeSubjects.map(s => {
       const filteredTopics = s.topics.filter((_, i) => {
         const details = s.topicDetails[i] || {};
         if (filter === "completed") return details.completed === true;
@@ -394,17 +405,7 @@ export default function Dashboard({ filter = "all" }) {
       });
 
       return { ...s, filteredTopics };
-    }).filter(s => {
-      // Hide passive subjects completely bypass checking
-      const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
-      const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi"];
-
-      // If the subject matches our passive criteria (AYT level + specific names/IDs)
-      if (passiveSubjectIds.includes(s.id)) return false;
-      if (s.level === "ayt" && passiveNames.includes(s.name)) return false;
-
-      return s.filteredTopics.length > 0;
-    });
+    }).filter(s => s.filteredTopics.length > 0);
   };
 
   const filteredSubjects = getFilteredSubjects();
