@@ -395,9 +395,14 @@ export default function Dashboard({ filter = "all" }) {
 
       return { ...s, filteredTopics };
     }).filter(s => {
-      // Hide passive subjects completely
-      const passiveSubjects = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
-      if (passiveSubjects.includes(s.id)) return false;
+      // Hide passive subjects completely bypass checking
+      const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
+      const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi"];
+
+      // If the subject matches our passive criteria (AYT level + specific names/IDs)
+      if (passiveSubjectIds.includes(s.id)) return false;
+      if (s.level === "ayt" && passiveNames.includes(s.name)) return false;
+
       return s.filteredTopics.length > 0;
     });
   };
