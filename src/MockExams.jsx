@@ -43,9 +43,8 @@ const BRANCH_SUBJECTS_YKS = [
     { id: "ayt_physics", label: "AYT Fizik" },
     { id: "ayt_chemistry", label: "AYT Kimya" },
     { id: "ayt_biology", label: "AYT Biyoloji" },
-    { id: "ayt_literature", label: "AYT Edebiyat" },
-    { id: "ayt_history", label: "AYT Tarih" },
-    { id: "ayt_geography", label: "AYT Coğrafya" }
+    { id: "ayt_history", label: "AYT Tarih-1" },
+    { id: "ayt_geography", label: "AYT Coğrafya-1" }
 ];
 
 const BRANCH_SUBJECTS_ZIRAAT = [

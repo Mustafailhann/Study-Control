@@ -490,33 +490,33 @@ async function seed() {
   });
   console.log("✅ AYT Coğrafya-1 eklendi");
 
-  // AYT Tarih-2
-  await setDoc(doc(db, "subjects", "yks_ayt_tarih2"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Tarih-2",
-    topics: [
-      "Türk İnkılabı",
-      "I. Dünya Savaşı",
-      "Mondros Ateşkes Antlaşması",
-      "Kurtuluş Savaşı Hazırlıkları",
-      "TBMM'nin Açılması",
-      "Cepheler ve Savaşlar",
-      "Lozan Barış Antlaşması",
-      "Atatürk İlkeleri",
-      "İnkılaplar",
-      "Siyasi Alanda İnkılaplar",
-      "Sosyal Alanda İnkılaplar",
-      "Eğitim ve Kültür",
-      "Ekonomik Gelişmeler",
-      "II. Dünya Savaşı",
-      "Soğuk Savaş Dönemi",
-      "Çok Partili Hayata Geçiş"
-    ]
-  });
-  console.log("✅ AYT Tarih-2 eklendi");
-
-  // AYT Coğrafya-2
+  //   // AYT Tarih-2
+  //   await setDoc(doc(db, "subjects", "yks_ayt_tarih2"), {
+  //     exam: "yks",
+  //     level: "ayt",
+  //     name: "Tarih-2",
+  //     topics: [
+  //       "Türk İnkılabı",
+  //       "I. Dünya Savaşı",
+  //       "Mondros Ateşkes Antlaşması",
+  //       "Kurtuluş Savaşı Hazırlıkları",
+  //       "TBMM'nin Açılması",
+  //       "Cepheler ve Savaşlar",
+  //       "Lozan Barış Antlaşması",
+  //       "Atatürk İlkeleri",
+  //       "İnkılaplar",
+  //       "Siyasi Alanda İnkılaplar",
+  //       "Sosyal Alanda İnkılaplar",
+  //       "Eğitim ve Kültür",
+  //       "Ekonomik Gelişmeler",
+  //       "II. Dünya Savaşı",
+  //       "Soğuk Savaş Dönemi",
+  //       "Çok Partili Hayata Geçiş"
+  //     ]
+  //   });
+  //   console.log("✅ AYT Tarih-2 eklendi");
+  // 
+  //   // AYT Coğrafya-2
   await setDoc(doc(db, "subjects", "yks_ayt_cografya2"), {
     exam: "yks",
     level: "ayt",
@@ -541,46 +541,46 @@ async function seed() {
   });
   console.log("✅ AYT Coğrafya-2 eklendi");
 
-  // AYT Felsefe
-  await setDoc(doc(db, "subjects", "yks_ayt_felsefe"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Felsefe",
-    topics: [
-      "Felsefenin Temel Disiplinleri",
-      "Varlık Felsefesi (Ontoloji)",
-      "Bilgi Felsefesi (Epistemoloji)",
-      "Doğru Düşünme Yöntemleri",
-      "Mantık",
-      "Bilim Felsefesi",
-      "Ahlak Felsefesi (Etik)",
-      "Sanat Felsefesi (Estetik)",
-      "Din Felsefesi",
-      "Siyaset Felsefesi",
-      "Hukuk Felsefesi"
-    ]
-  });
-  console.log("✅ AYT Felsefe eklendi");
-
-  // AYT Din Kültürü
-  await setDoc(doc(db, "subjects", "yks_ayt_din"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Din Kültürü ve Ahlak Bilgisi",
-    topics: [
-      "Din ve Ahlak",
-      "İslam'ın Temel Kavramları",
-      "Kur'an ve Yorumu",
-      "Hz. Muhammed'in Hayatı",
-      "İslam Düşünce Tarihi",
-      "İslam ve Tasavvuf",
-      "Güncel Dini Meseleler",
-      "Dinler Arası Diyalog",
-      "İslam Ahlakı",
-      "Aile ve Toplum"
-    ]
-  });
-  console.log("✅ AYT Din Kültürü eklendi");
+  //   // AYT Felsefe
+  //   await setDoc(doc(db, "subjects", "yks_ayt_felsefe"), {
+  //     exam: "yks",
+  //     level: "ayt",
+  //     name: "Felsefe",
+  //     topics: [
+  //       "Felsefenin Temel Disiplinleri",
+  //       "Varlık Felsefesi (Ontoloji)",
+  //       "Bilgi Felsefesi (Epistemoloji)",
+  //       "Doğru Düşünme Yöntemleri",
+  //       "Mantık",
+  //       "Bilim Felsefesi",
+  //       "Ahlak Felsefesi (Etik)",
+  //       "Sanat Felsefesi (Estetik)",
+  //       "Din Felsefesi",
+  //       "Siyaset Felsefesi",
+  //       "Hukuk Felsefesi"
+  //     ]
+  //   });
+  //   console.log("✅ AYT Felsefe eklendi");
+  // 
+  //   // AYT Din Kültürü
+  //   await setDoc(doc(db, "subjects", "yks_ayt_din"), {
+  //     exam: "yks",
+  //     level: "ayt",
+  //     name: "Din Kültürü ve Ahlak Bilgisi",
+  //     topics: [
+  //       "Din ve Ahlak",
+  //       "İslam'ın Temel Kavramları",
+  //       "Kur'an ve Yorumu",
+  //       "Hz. Muhammed'in Hayatı",
+  //       "İslam Düşünce Tarihi",
+  //       "İslam ve Tasavvuf",
+  //       "Güncel Dini Meseleler",
+  //       "Dinler Arası Diyalog",
+  //       "İslam Ahlakı",
+  //       "Aile ve Toplum"
+  //     ]
+  //   });
+  //   console.log("✅ AYT Din Kültürü eklendi");
 
   // Ziraat BT - Algoritma ve Veri Yapıları
   await setDoc(doc(db, "subjects", "ziraat_bt_algoritma"), {

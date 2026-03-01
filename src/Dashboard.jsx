@@ -394,7 +394,12 @@ export default function Dashboard({ filter = "all" }) {
       });
 
       return { ...s, filteredTopics };
-    }).filter(s => s.filteredTopics.length > 0);
+    }).filter(s => {
+      // Hide passive subjects completely
+      const passiveSubjects = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
+      if (passiveSubjects.includes(s.id)) return false;
+      return s.filteredTopics.length > 0;
+    });
   };
 
   const filteredSubjects = getFilteredSubjects();
