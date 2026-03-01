@@ -517,29 +517,29 @@ async function seed() {
   //   console.log("✅ AYT Tarih-2 eklendi");
   // 
   //   // AYT Coğrafya-2
-  await setDoc(doc(db, "subjects", "yks_ayt_cografya2"), {
-    exam: "yks",
-    level: "ayt",
-    name: "Coğrafya-2",
-    topics: [
-      "Türkiye'nin Coğrafi Bölgeleri",
-      "Bölgesel Coğrafya",
-      "Çevre ve Toplum",
-      "Küresel Ortam",
-      "Doğal Kaynaklar",
-      "Enerji Kaynakları",
-      "Türkiye'de Tarım",
-      "Türkiye'de Hayvancılık",
-      "Türkiye'de Madencilik",
-      "Türkiye'de Sanayi",
-      "Türkiye'de Ulaşım",
-      "Türkiye'de Ticaret",
-      "Türkiye'de Turizm",
-      "Çevre Sorunları",
-      "Küresel İklim Değişikliği"
-    ]
-  });
-  console.log("✅ AYT Coğrafya-2 eklendi");
+  // await setDoc(doc(db, "subjects", "yks_ayt_cografya2"), {
+  //   exam: "yks",
+  //   level: "ayt",
+  //   name: "Coğrafya-2",
+  //   topics: [
+  //     "Türkiye'nin Coğrafi Bölgeleri",
+  //     "Bölgesel Coğrafya",
+  //     "Çevre ve Toplum",
+  //     "Küresel Ortam",
+  //     "Doğal Kaynaklar",
+  //     "Enerji Kaynakları",
+  //     "Türkiye'de Tarım",
+  //     "Türkiye'de Hayvancılık",
+  //     "Türkiye'de Madencilik",
+  //     "Türkiye'de Sanayi",
+  //     "Türkiye'de Ulaşım",
+  //     "Türkiye'de Ticaret",
+  //     "Türkiye'de Turizm",
+  //     "Çevre Sorunları",
+  //     "Küresel İklim Değişikliği"
+  //   ]
+  // });
+  // console.log("✅ AYT Coğrafya-2 eklendi");
 
   //   // AYT Felsefe
   //   await setDoc(doc(db, "subjects", "yks_ayt_felsefe"), {

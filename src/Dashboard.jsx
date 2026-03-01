@@ -323,7 +323,14 @@ export default function Dashboard({ filter = "all" }) {
     let totalCorrect = 0;
     let totalWrong = 0;
 
+    const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din", "yks_ayt_cografya2"];
+    const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi", "Coğrafya-2"];
+
     subjects.forEach(s => {
+      // Pasif dersleri genel hesaplamalara dahil etme
+      if (passiveSubjectIds.includes(s.id)) return;
+      if (s.level === "ayt" && passiveNames.includes(s.name)) return;
+
       if (Array.isArray(s.topics)) {
         totalTopics += s.topics.length;
         s.topics.forEach((_, i) => {
@@ -384,8 +391,8 @@ export default function Dashboard({ filter = "all" }) {
   // Filtreye göre konuları filtrele
   const getFilteredSubjects = () => {
     // 1. First, completely remove passive subjects from any view
-    const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din"];
-    const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi"];
+    const passiveSubjectIds = ["yks_ayt_felsefe", "yks_ayt_tarih2", "yks_ayt_din", "yks_ayt_cografya2"];
+    const passiveNames = ["Felsefe", "Tarih-2", "Din Kültürü ve Ahlak Bilgisi", "Coğrafya-2"];
 
     const activeSubjects = subjects.filter(s => {
       if (passiveSubjectIds.includes(s.id)) return false;
