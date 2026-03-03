@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import { calculateLevel, getNextLevelXp } from "./gamification";
+import { NotebookPen } from "lucide-react";
 
 const colors = {
   primary: "#6366f1",
@@ -23,7 +24,8 @@ export default function Sidebar({ filter, setFilter, onAIClick, onReportClick })
     { id: "shouldStudy", label: "Tekrar Edilecek", icon: "🔄", count: null },
     { id: "mistakes", label: "Yanlış Defterim", icon: "📸", count: null },
     { id: "mockExams", label: "Denemelerim", icon: "📊", count: null },
-    { id: "pomodoro", label: "Odak Odası", icon: "⏱️", count: null }
+    { id: "pomodoro", label: "Odak Odası", icon: "⏱️", count: null },
+    { id: "notebook", label: "Not Defterim", icon: <NotebookPen size={20} strokeWidth={2.5} />, count: null }
   ];
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });

@@ -114,11 +114,21 @@ export default function MistakeBook() {
             setUploadProgress("Buluta kaydediliyor...");
 
             // 2. Görseli Firebase Storage'a yükle (arşiv için)
-            const storageRef = ref(storage, `mistakes/${user.uid}/${Date.now()}_${selectedFile.name}`);
-            await uploadString(storageRef, base64Image, "data_url");
+            const filename = selectedFile.name || "image.jpg";
+            const storageRef = ref(storage, `mistakes/${user.uid}/${Date.now()}_${filename}`);
+
+            console.log("Storage yüklemesi başlıyor...");
+            const uploadTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Storage yüklemesi zaman aşımına uğradı. Bağlantıyı veya Firebase yapılandırmasını kontrol edin.")), 15000));
+            await Promise.race([
+                uploadString(storageRef, base64Image, "data_url"),
+                uploadTimeout
+            ]);
+
+            console.log("Storage yüklemesi başarılı. URL alınıyor...");
             const imageUrl = await getDownloadURL(storageRef);
 
             // 3. Firestore'a kaydet
+            console.log("Firestore kaydı başlıyor...");
             const newMistake = {
                 uid: user.uid,
                 imageUrl,
@@ -127,7 +137,12 @@ export default function MistakeBook() {
                 createdAt: new Date().toISOString()
             };
 
-            await addDoc(collection(db, "mistakes"), newMistake);
+            const firestoreTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore kaydı zaman aşımına uğradı.")), 15000));
+            await Promise.race([
+                addDoc(collection(db, "mistakes"), newMistake),
+                firestoreTimeout
+            ]);
+            console.log("Firestore kaydı başarılı.");
 
             // Reset and refresh
             setShowModal(false);

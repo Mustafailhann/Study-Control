@@ -9,6 +9,7 @@ import AIChat from "./AIChat";
 import MistakeBook from "./MistakeBook";
 import Pomodoro from "./Pomodoro";
 import MockExams from "./MockExams";
+import Notebook from "./components/Notebook/Notebook";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -62,7 +63,8 @@ export default function App() {
               filter === "mistakes" ? <MistakeBook /> :
                 filter === "pomodoro" ? <Pomodoro /> :
                   filter === "mockExams" ? <MockExams /> :
-                    <Dashboard filter={filter} />
+                    filter === "notebook" ? <Notebook /> :
+                      <Dashboard filter={filter} />
             } />
           </Routes>
         </div>
