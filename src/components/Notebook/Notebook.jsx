@@ -128,8 +128,10 @@ export default function Notebook() {
                             exit={{ x: 50, opacity: 0 }}
                             className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-10"
                         >
-                            <div className="text-sm font-semibold text-purple-700/80 mb-2 rotate-90 translate-y-8 tracking-widest whitespace-nowrap">
-                                KALP NOTLAR
+                            <div className="h-28 flex items-center justify-center mb-2">
+                                <div className="text-sm font-semibold text-purple-700/80 rotate-90 tracking-widest whitespace-nowrap">
+                                    KALP NOTLAR
+                                </div>
                             </div>
                             <button
                                 onClick={addNote}
