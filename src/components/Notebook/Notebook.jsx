@@ -18,7 +18,7 @@ export default function Notebook() {
     ]);
 
     const [notes, setNotes] = useState([
-        { id: 1, x: 850, y: 150, text: "Odağını kaybetme!" } // Initial note placed near the pile
+        { id: 1, x: 850, y: 150, text: "Odağını kaybetme!", pageIndex: 0 } // Initial note placed near the pile
     ]);
 
     const [isLoaded, setIsLoaded] = useState(false);
@@ -37,7 +37,7 @@ export default function Notebook() {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.pages) setPages(data.pages);
-                    if (data.notes) setNotes(data.notes);
+                    if (data.notes) setNotes(data.notes.map(n => ({ ...n, pageIndex: n.pageIndex !== undefined ? n.pageIndex : 0 })));
                 }
             } catch (error) {
                 console.error("Not defteri verileri çekilirken hata oluştu:", error);
@@ -97,7 +97,7 @@ export default function Notebook() {
     const addNote = () => {
         const newId = Date.now();
         // Spaawn slightly offset from the pile button
-        setNotes([...notes, { id: newId, x: 800 + Math.random() * 20, y: 200 + Math.random() * 20, text: "" }]);
+        setNotes([...notes, { id: newId, x: 800 + Math.random() * 20, y: 200 + Math.random() * 20, text: "", pageIndex: currentPage }]);
     };
 
     const nextPage = () => {
@@ -234,7 +234,7 @@ export default function Notebook() {
                     </AnimatePresence>
 
                     {/* Draggable Sticky Notes */}
-                    {isOpen && notes.map(note => (
+                    {isOpen && notes.filter(note => (note.pageIndex ?? 0) === currentPage).map(note => (
                         <StickyHeart
                             key={note.id}
                             note={note}
