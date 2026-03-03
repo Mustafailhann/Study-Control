@@ -116,8 +116,9 @@ export default function Notebook() {
     };
 
     return (
-        <div className="w-full h-[calc(100vh-40px)] flex items-center justify-center p-8 bg-transparent relative">
-            <div className="relative w-[1040px] h-[660px] flex items-center justify-start">
+        <div className="w-full min-h-[calc(100vh-40px)] flex items-center justify-center p-2 sm:p-4 md:p-8 bg-transparent relative overflow-hidden">
+            {/* The inner container preserves the 1040x660 grid for absolute positioning, while scaling down visually on smaller screens */}
+            <div className="relative w-[1040px] h-[660px] flex items-center justify-start transform scale-[0.35] sm:scale-[0.55] md:scale-[0.75] lg:scale-[0.85] xl:scale-100 origin-center transition-transform duration-300">
 
                 {/* Post-it pile on the right side */}
                 <AnimatePresence>

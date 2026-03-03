@@ -39,9 +39,9 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="flex flex-col lg:flex-row min-h-screen">
         {/* SIDEBAR */}
-        <div style={{ width: 280, flexShrink: 0 }}>
+        <div className="w-full lg:w-[280px] shrink-0 border-b lg:border-r border-white/10 z-10">
           <Sidebar
             filter={filter}
             setFilter={setFilter}
@@ -57,7 +57,7 @@ export default function App() {
         </div>
 
         {/* CONTENT */}
-        <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
+        <div className="flex-1 overflow-auto relative bg-[#f5f7fa]">
           <Routes>
             <Route path="/" element={
               filter === "mistakes" ? <MistakeBook /> :

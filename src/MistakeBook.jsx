@@ -161,8 +161,8 @@ export default function MistakeBook() {
     };
 
     return (
-        <div style={{ padding: "40px 20px", maxWidth: 1000, margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+        <div style={{ padding: "20px", paddingBottom: "40px", maxWidth: 1000, margin: "0 auto" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                 <div>
                     <h1 style={{ margin: 0, color: colors.dark, fontSize: 28, fontWeight: 700 }}>
                         📸 Yanlış Defterim
