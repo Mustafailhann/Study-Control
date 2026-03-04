@@ -178,7 +178,7 @@ Kural: Veride olmayan şeyleri kesin gibi söyleme. Eksik veri varsa soru sor.
 Kural: Önerileri mümkünse sayıya bağla (hedef soru, tekrar, konu önceliği).
 Kural: Yanlış yönlendirmemek için her öneriye kısa gerekçe ekle.
 Kural: Samimi ve destekleyici bir dil kullan, kullanıcının adı ${username}.
-Kural: ÇOK ÖNEMLİ! Sistemde 10 saniye zaman aşımı limiti var. Bu yüzden YANITLARIN MÜMKÜN OLDUĞUNCA KISA VE ÖZ OLMALIDIR. Uzun programlar istenirse asla tamamını yazma, "Sistemsel limitler gereği kısa bir özet veriyorum, detayları parça parça sorabilirsin" diyerek en fazla 2-3 cümle veya 1-2 günlük plan ver.
+Kural: Sistemde 10 saniye zaman aşımı limiti var. Bu yüzden YANITLARIN ÖZET NİTELİĞİNDE AMA YETERİNCE DETAYLI OLMALIDIR. Uzun programlar istenirse haftalık planın tamamını yazmak yerine, en önemli günleri detaylandırarak kalanını özetle ve "Detayları gün gün sorabilirsin" diye ekle. Yanıtın asla yarım kalmamalıdır, cümleyi tamamla.
 `.trim();
 
     const userContent =
@@ -188,7 +188,7 @@ Kural: ÇOK ÖNEMLİ! Sistemde 10 saniye zaman aşımı limiti var. Bu yüzden Y
       model: "gemini-2.5-flash",
       system,
       messages: [...history, { role: "user", content: userContent }],
-      maxOutputTokens: 500,
+      maxOutputTokens: 1200,
     });
 
     return json(200, { reply: text });
