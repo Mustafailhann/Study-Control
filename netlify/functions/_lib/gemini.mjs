@@ -1,6 +1,6 @@
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
-export async function callGemini({ model, system, messages, responseMimeType }) {
+export async function callGemini({ model, system, messages, responseMimeType, maxOutputTokens }) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Missing GEMINI_API_KEY");
 
@@ -15,6 +15,7 @@ export async function callGemini({ model, system, messages, responseMimeType }) 
     generationConfig: {
       temperature: 0.4,
       responseMimeType,
+      maxOutputTokens,
     },
   };
 

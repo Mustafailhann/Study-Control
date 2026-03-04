@@ -20,15 +20,21 @@ export const handler = async (event) => {
     const snap = await db
       .collection("ai_reports")
       .where("uid", "==", decoded.uid)
-      .orderBy("createdAt", "desc")
-      .limit(1)
       .get();
 
     if (snap.empty) return json(200, { report: null });
 
-    const doc = snap.docs[0];
+    // Bellekte sırala (composite index olmamasını telafi etmek için)
+    const docs = snap.docs.map(d => ({ doc: d, data: d.data() }));
+    docs.sort((a, b) => {
+      const tA = a.data.createdAt?.toDate?.()?.getTime() || Date.parse(a.data.createdAt) || 0;
+      const tB = b.data.createdAt?.toDate?.()?.getTime() || Date.parse(b.data.createdAt) || 0;
+      return tB - tA;
+    });
+
+    const doc = docs[0].doc;
     const data = doc.data();
-    
+
     // Firestore Timestamp'ı JSON-friendly formata çevir
     const report = {
       id: doc.id,

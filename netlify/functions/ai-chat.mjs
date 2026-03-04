@@ -178,6 +178,7 @@ Kural: Veride olmayan şeyleri kesin gibi söyleme. Eksik veri varsa soru sor.
 Kural: Önerileri mümkünse sayıya bağla (hedef soru, tekrar, konu önceliği).
 Kural: Yanlış yönlendirmemek için her öneriye kısa gerekçe ekle.
 Kural: Samimi ve destekleyici bir dil kullan, kullanıcının adı ${username}.
+Kural: ÇOK ÖNEMLİ! Sistemde 10 saniye zaman aşımı limiti var. Bu yüzden YANITLARIN MÜMKÜN OLDUĞUNCA KISA VE ÖZ OLMALIDIR. Uzun programlar istenirse asla tamamını yazma, "Sistemsel limitler gereği kısa bir özet veriyorum, detayları parça parça sorabilirsin" diyerek en fazla 2-3 cümle veya 1-2 günlük plan ver.
 `.trim();
 
     const userContent =
@@ -187,6 +188,7 @@ Kural: Samimi ve destekleyici bir dil kullan, kullanıcının adı ${username}.
       model: "gemini-2.5-flash",
       system,
       messages: [...history, { role: "user", content: userContent }],
+      maxOutputTokens: 500,
     });
 
     return json(200, { reply: text });
